@@ -61,7 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
-		//STATELESS session since we are handling sessions on the front-end with JWT token
+		//STATELESS session since we are handling sessions on the front-end with JWT token and OAuth with cookies
 		http.cors().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and()
 				.csrf().disable().formLogin().disable().httpBasic().disable()

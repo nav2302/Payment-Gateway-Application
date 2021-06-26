@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
@@ -19,8 +20,10 @@ import com.navdeep.dto.SignUpRequest;
 import com.navdeep.dto.SocialProvider;
 import com.navdeep.exception.OAuth2AuthenticationProcessingException;
 import com.navdeep.exception.UserAlreadyExistAuthenticationException;
+import com.navdeep.model.PasswordResetToken;
 import com.navdeep.model.Role;
 import com.navdeep.model.User;
+import com.navdeep.repo.PasswordTokenRepository;
 import com.navdeep.repo.RoleRepository;
 import com.navdeep.repo.UserRepository;
 import com.navdeep.security.oauth2.user.OAuth2UserInfo;
@@ -47,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private SecretGenerator secretGenerator;
+	
+	@Autowired
+	PasswordTokenRepository passwordTokenRepository;
 
 	@Override
 	@Transactional(value = "transactionManager")
@@ -128,5 +134,36 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Optional<User> findUserById(Long id) {
 		return userRepository.findById(id);
+	}
+	
+	public void createPasswordResetTokenForUser(User user, String token) {
+	    PasswordResetToken myToken = new PasswordResetToken(token, user);
+	    passwordTokenRepository.save(myToken);
+	}
+	
+	public String validatePasswordResetToken(String token) {
+		final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
+
+	    return !isTokenFound(passToken) ? "invalidToken" : isTokenExpired(passToken) ? "expired" : null;
+	}
+	
+	public PasswordResetToken findByToken(String token) {
+		return passwordTokenRepository.findByToken(token);
+	}
+
+	private boolean isTokenFound(PasswordResetToken passToken) {
+	    return passToken != null;
+	}
+
+	private boolean isTokenExpired(PasswordResetToken passToken) {
+	    final Calendar cal = Calendar.getInstance();
+	    return passToken.getExpiryDate().before(cal.getTime());
+	}
+
+	@Override
+	public void changeUserPassword(User user, String password) {
+		// TODO Auto-generated method stub
+		user.setPassword(new BCryptPasswordEncoder().encode(password));
+		userRepository.save(user);
 	}
 }

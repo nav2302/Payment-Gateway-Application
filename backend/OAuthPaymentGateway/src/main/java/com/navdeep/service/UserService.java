@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import com.navdeep.dto.LocalUser;
 import com.navdeep.dto.SignUpRequest;
 import com.navdeep.exception.UserAlreadyExistAuthenticationException;
+import com.navdeep.model.PasswordResetToken;
 import com.navdeep.model.User;
 
 /**
@@ -24,4 +25,12 @@ public interface UserService {
 	Optional<User> findUserById(Long id);
 
 	LocalUser processUserRegistration(String registrationId, Map<String, Object> attributes, OidcIdToken idToken, OidcUserInfo userInfo);
+	
+	void createPasswordResetTokenForUser(User user, String token);
+
+	public String validatePasswordResetToken(String token);
+
+	public void changeUserPassword(User user, String password);
+
+	public PasswordResetToken findByToken(String token);
 }
