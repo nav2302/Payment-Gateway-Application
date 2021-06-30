@@ -38,7 +38,13 @@ public class SignUpRequest {
 	private String matchingPassword;
 
 	private boolean using2FA;
+	
+	@NotEmpty
+	private String captcha;
 
+	@NotEmpty
+	private String hiddenCaptcha;
+	
 	public SignUpRequest(String providerUserId, String displayName, String email, String password, SocialProvider socialProvider) {
 		this.providerUserId = providerUserId;
 		this.displayName = displayName;

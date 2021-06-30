@@ -4,6 +4,7 @@
 /frontend/angular-OAuthPaymentGateway/dist
 /frontend/angular-OAuthPaymentGateway/tmp
 /frontend/angular-OAuthPaymentGateway/out-tsc
+/backend/OAuthPaymentGateway/target/*
 # Only exists if Bazel was run
 /frontend/angular-OAuthPaymentGateway/bazel-out
 

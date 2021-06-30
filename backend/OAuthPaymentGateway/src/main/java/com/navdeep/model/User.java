@@ -14,6 +14,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -73,4 +74,13 @@ public class User implements Serializable {
 	@ManyToMany
 	@JoinTable(name = "user_role", joinColumns = {@JoinColumn(name = "USER_ID")}, inverseJoinColumns = {@JoinColumn(name = "ROLE_ID")})
 	private Set<Role> roles;
+	
+	@Transient
+	private String captcha;
+	
+	@Transient
+	private String hiddenCaptcha;
+	
+	@Transient
+	private String realCaptcha;
 }

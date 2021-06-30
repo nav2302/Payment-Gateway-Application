@@ -27,7 +27,9 @@ export class AuthService {
       password: user.password,
       matchingPassword: user.matchingPassword,
       socialProvider: 'LOCAL',
-      using2FA: user.using2FA
+      using2FA: user.using2FA,
+      hiddenCaptcha: user.hiddenCaptcha,
+      captcha: user.captcha
     }, httpOptions);
   }
   
@@ -35,5 +37,9 @@ export class AuthService {
     return this.http.post(AppConstants.AUTH_API + 'verify', credentials.code, {
     	  headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
     });
+  }
+
+  getCaptcha(): Observable<any> {
+    return this.http.get(AppConstants.AUTH_API + 'captcha')
   }
 }

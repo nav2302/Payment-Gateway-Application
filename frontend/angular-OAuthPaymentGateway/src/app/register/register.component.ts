@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../_services/auth.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-register',
@@ -14,13 +15,27 @@ export class RegisterComponent implements OnInit {
   isUsing2FA = false;
   errorMessage = '';
   qrCodeImage = '';
+  realCaptcha = '';
+  hiddenCaptcha = '';
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, public _DomSanitizationService: DomSanitizer) { }
 
   ngOnInit(): void {
+    this.authService.getCaptcha().subscribe(
+      data => {
+        console.log(data)
+        this.realCaptcha = "data:image/jpg;base64, " + data.realCaptcha;
+        this.hiddenCaptcha = data.hiddenCaptcha
+      },
+      err => {
+        this.errorMessage = err.error.message;
+      }
+    )
   }
 
   onSubmit(): void {
+    this.form.hiddenCaptcha = this.hiddenCaptcha
+    console.log(this.form);
     this.authService.register(this.form).subscribe(
       data => {
         console.log(data);
@@ -36,6 +51,18 @@ export class RegisterComponent implements OnInit {
         this.isSignUpFailed = true;
       }
     );
+  }
+
+  callFunction(event){
+    this.authService.getCaptcha().subscribe(
+      data => {
+        this.realCaptcha = "data:image/jpg;base64, " + data.realCaptcha;
+        this.hiddenCaptcha = data.hiddenCaptcha
+      },
+      err => {
+        this.errorMessage = err.error.message;
+      }
+    )
   }
 
 }

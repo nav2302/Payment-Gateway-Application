@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +30,10 @@ import com.navdeep.exception.UserAlreadyExistAuthenticationException;
 import com.navdeep.model.User;
 import com.navdeep.security.jwt.TokenProvider;
 import com.navdeep.service.UserService;
+import com.navdeep.util.CaptchaUtil;
 import com.navdeep.util.GeneralUtils;
 
+import cn.apiclub.captcha.Captcha;
 import dev.samstevens.totp.code.CodeVerifier;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import dev.samstevens.totp.qr.QrData;
@@ -67,7 +70,6 @@ public class AuthController {
 				loginRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		LocalUser localUser = (LocalUser) authentication.getPrincipal();
-//		System.out.println(localUser.toString());
 		boolean authenticated = !localUser.getUser().isUsing2FA();
 		String jwt = tokenProvider.createToken(localUser, authenticated);
 		return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, authenticated, authenticated ? GeneralUtils.buildUserInfo(localUser) : null));
@@ -76,6 +78,10 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
 		try {
+			if (!signUpRequest.getCaptcha().equals(signUpRequest.getHiddenCaptcha())) {
+				log.error("Invalid Captcha");
+				return new ResponseEntity<>(new ApiResponse(false, "Invalid Captcha!"), HttpStatus.BAD_REQUEST);
+			}
 			User user = userService.registerNewUser(signUpRequest);
 			if (signUpRequest.isUsing2FA()) {
 				QrData data = qrDataFactory.newBuilder().label(user.getEmail()).secret(user.getSecret()).issuer("JavaChinna").build();
@@ -103,5 +109,16 @@ public class AuthController {
 		}
 		String jwt = tokenProvider.createToken(user, true);
 		return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, true, GeneralUtils.buildUserInfo(user)));
+	}
+	
+	@GetMapping("/captcha")
+	private ResponseEntity<?> getCaptcha() {
+		User user = new User();
+		Captcha captcha = CaptchaUtil.createCaptcha(240, 70);
+		user.setHiddenCaptcha(captcha.getAnswer());
+		user.setCaptcha(""); // value entered by the User
+		user.setRealCaptcha(CaptchaUtil.encodeCaptcha(captcha));
+		return ResponseEntity.ok(user);
+		
 	}
 }

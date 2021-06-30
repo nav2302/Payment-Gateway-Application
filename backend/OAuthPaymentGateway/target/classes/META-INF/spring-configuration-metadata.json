@@ -9,13 +9,13 @@
       "name": "app.auth",
       "type": "com.navdeep.config.AppProperties$Auth",
       "sourceType": "com.navdeep.config.AppProperties",
-      "sourceMethod": "public com.navdeep.config.AppProperties.Auth getAuth() "
+      "sourceMethod": "getAuth()"
     },
     {
       "name": "app.oauth2",
       "type": "com.navdeep.config.AppProperties$OAuth2",
       "sourceType": "com.navdeep.config.AppProperties",
-      "sourceMethod": "public com.navdeep.config.AppProperties.OAuth2 getOauth2() "
+      "sourceMethod": "getOauth2()"
     },
     {
       "name": "razorpay",
@@ -27,7 +27,8 @@
     {
       "name": "app.auth.token-expiration-msec",
       "type": "java.lang.Long",
-      "sourceType": "com.navdeep.config.AppProperties$Auth"
+      "sourceType": "com.navdeep.config.AppProperties$Auth",
+      "defaultValue": 0
     },
     {
       "name": "app.auth.token-secret",
