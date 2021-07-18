@@ -3,8 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AppConstants } from '../common/app.constants';
 
+
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  withCredentials: true, 'access-control-allow-origin': "http://localhost:4200/", 'Content-Type': 'application/json'
 };
 
 @Injectable({
@@ -32,10 +33,10 @@ export class AuthService {
       captcha: user.captcha
     }, httpOptions);
   }
-  
+
   verify(credentials): Observable<any> {
     return this.http.post(AppConstants.AUTH_API + 'verify', credentials.code, {
-    	  headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
+      headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
     });
   }
 

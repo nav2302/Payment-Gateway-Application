@@ -7,10 +7,16 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.SerializationUtils;
 
 public class CookieUtils {
-
+	
+	@Value("${authentication-test.auth.accessTokenCookieName}")
+	private static String accessTokenCookieName;
+	
 	public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
 		Cookie[] cookies = request.getCookies();
 
@@ -53,5 +59,11 @@ public class CookieUtils {
 
 	public static <T> T deserialize(Cookie cookie, Class<T> cls) {
 		return cls.cast(SerializationUtils.deserialize(Base64.getUrlDecoder().decode(cookie.getValue())));
+	}
+
+	public static HttpCookie createAccessTokenCookie(String token, Long duration) {
+		String encryptedToken = SecurityCipher.encrypt(token);
+		return ResponseCookie.from("AuthToken", encryptedToken).maxAge(duration).httpOnly(true).path("/")
+				.build();
 	}
 }

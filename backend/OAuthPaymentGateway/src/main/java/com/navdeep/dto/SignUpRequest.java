@@ -39,10 +39,10 @@ public class SignUpRequest {
 
 	private boolean using2FA;
 	
-	@NotEmpty
+//	@NotEmpty
 	private String captcha;
 
-	@NotEmpty
+//	@NotEmpty
 	private String hiddenCaptcha;
 	
 	public SignUpRequest(String providerUserId, String displayName, String email, String password, SocialProvider socialProvider) {

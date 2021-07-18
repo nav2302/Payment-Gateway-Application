@@ -3,6 +3,9 @@ package com.navdeep.service;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 
@@ -33,4 +36,6 @@ public interface UserService {
 	public void changeUserPassword(User user, String password);
 
 	public PasswordResetToken findByToken(String token);
+
+	public String logout(HttpServletRequest request, HttpServletResponse response);
 }

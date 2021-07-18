@@ -1,4 +1,8 @@
 import { Injectable } from '@angular/core';
+import { tap } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AppConstants } from '../common/app.constants';
 
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'auth-user';
@@ -8,10 +12,21 @@ const USER_KEY = 'auth-user';
 })
 export class TokenStorageService {
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
-  signOut(): void {
+  // signOut(): void {
+  //   window.sessionStorage.clear();
+  // }
+
+  signOut(): Observable<any> {
+    console.log("This method is called");
+    window.localStorage.clear();
     window.sessionStorage.clear();
+    return this.http.get(AppConstants.AUTH_API + 'logout',{withCredentials: true}).pipe(
+      tap(res => {
+        console.log(res);
+      })
+    )
   }
 
   public saveToken(token: string): void {

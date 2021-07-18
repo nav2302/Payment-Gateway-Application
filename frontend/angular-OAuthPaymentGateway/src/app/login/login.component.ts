@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
       this.currentUser = this.tokenStorage.getUser();
     }
   	else if(token){
-  		this.tokenStorage.saveToken(token);
+  		// this.tokenStorage.saveToken(token);
   		this.userService.getCurrentUser().subscribe(
   		      data => {
   		        this.login(data);
@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     this.authService.login(this.form).subscribe(
       data => {
-        this.tokenStorage.saveToken(data.accessToken);
+        // this.tokenStorage.saveToken(data.accessToken);
         if(data.authenticated){
 	        this.login(data.user);
         } else {

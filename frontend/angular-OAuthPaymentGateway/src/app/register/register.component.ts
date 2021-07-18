@@ -35,7 +35,7 @@ export class RegisterComponent implements OnInit {
 
   onSubmit(): void {
     this.form.hiddenCaptcha = this.hiddenCaptcha
-    console.log(this.form);
+    // console.log(this.form);
     this.authService.register(this.form).subscribe(
       data => {
         console.log(data);
@@ -61,6 +61,7 @@ export class RegisterComponent implements OnInit {
       },
       err => {
         this.errorMessage = err.error.message;
+        this.isSignUpFailed = true;
       }
     )
   }

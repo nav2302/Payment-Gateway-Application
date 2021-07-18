@@ -6,7 +6,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
@@ -50,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private SecretGenerator secretGenerator;
-	
+
 	@Autowired
 	PasswordTokenRepository passwordTokenRepository;
 
@@ -58,9 +63,11 @@ public class UserServiceImpl implements UserService {
 	@Transactional(value = "transactionManager")
 	public User registerNewUser(final SignUpRequest signUpRequest) throws UserAlreadyExistAuthenticationException {
 		if (signUpRequest.getUserID() != null && userRepository.existsById(signUpRequest.getUserID())) {
-			throw new UserAlreadyExistAuthenticationException("User with User id " + signUpRequest.getUserID() + " already exist");
+			throw new UserAlreadyExistAuthenticationException(
+					"User with User id " + signUpRequest.getUserID() + " already exist");
 		} else if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-			throw new UserAlreadyExistAuthenticationException("User with email id " + signUpRequest.getEmail() + " already exist");
+			throw new UserAlreadyExistAuthenticationException(
+					"User with email id " + signUpRequest.getEmail() + " already exist");
 		}
 		User user = buildUser(signUpRequest);
 		Date now = Calendar.getInstance().getTime();
@@ -96,8 +103,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public LocalUser processUserRegistration(String registrationId, Map<String, Object> attributes, OidcIdToken idToken, OidcUserInfo userInfo) {
-		
+	public LocalUser processUserRegistration(String registrationId, Map<String, Object> attributes, OidcIdToken idToken,
+			OidcUserInfo userInfo) {
+
 		OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, attributes);
 		if (StringUtils.hasLength(oAuth2UserInfo.getName())) {
 			throw new OAuth2AuthenticationProcessingException("Name not found from OAuth2 provider");
@@ -107,10 +115,11 @@ public class UserServiceImpl implements UserService {
 		SignUpRequest userDetails = toUserRegistrationObject(registrationId, oAuth2UserInfo);
 		User user = findUserByEmail(oAuth2UserInfo.getEmail());
 		if (user != null) {
-			if (!user.getProvider().equals(registrationId) && !user.getProvider().equals(SocialProvider.LOCAL.getProviderType())) {
+			if (!user.getProvider().equals(registrationId)
+					&& !user.getProvider().equals(SocialProvider.LOCAL.getProviderType())) {
 				throw new OAuth2AuthenticationProcessingException(
-						"Looks like you're signed up with " + user.getProvider() + " account. Please use your " + user.getProvider() + 
-						" account to login.");
+						"Looks like you're signed up with " + user.getProvider() + " account. Please use your "
+								+ user.getProvider() + " account to login.");
 			}
 			user = updateExistingUser(user, oAuth2UserInfo);
 		} else {
@@ -126,38 +135,38 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private SignUpRequest toUserRegistrationObject(String registrationId, OAuth2UserInfo oAuth2UserInfo) {
-		return SignUpRequest.getBuilder().addProviderUserID(oAuth2UserInfo.getId()).addDisplayName(oAuth2UserInfo.getName())
-				.addEmail(oAuth2UserInfo.getEmail()).addSocialProvider(GeneralUtils.toSocialProvider(registrationId)).
-				addPassword("changeit").build();
+		return SignUpRequest.getBuilder().addProviderUserID(oAuth2UserInfo.getId())
+				.addDisplayName(oAuth2UserInfo.getName()).addEmail(oAuth2UserInfo.getEmail())
+				.addSocialProvider(GeneralUtils.toSocialProvider(registrationId)).addPassword("changeit").build();
 	}
 
 	@Override
 	public Optional<User> findUserById(Long id) {
 		return userRepository.findById(id);
 	}
-	
+
 	public void createPasswordResetTokenForUser(User user, String token) {
-	    PasswordResetToken myToken = new PasswordResetToken(token, user);
-	    passwordTokenRepository.save(myToken);
+		PasswordResetToken myToken = new PasswordResetToken(token, user);
+		passwordTokenRepository.save(myToken);
 	}
-	
+
 	public String validatePasswordResetToken(String token) {
 		final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
 
-	    return !isTokenFound(passToken) ? "invalidToken" : isTokenExpired(passToken) ? "expired" : null;
+		return !isTokenFound(passToken) ? "invalidToken" : isTokenExpired(passToken) ? "expired" : null;
 	}
-	
+
 	public PasswordResetToken findByToken(String token) {
 		return passwordTokenRepository.findByToken(token);
 	}
 
 	private boolean isTokenFound(PasswordResetToken passToken) {
-	    return passToken != null;
+		return passToken != null;
 	}
 
 	private boolean isTokenExpired(PasswordResetToken passToken) {
-	    final Calendar cal = Calendar.getInstance();
-	    return passToken.getExpiryDate().before(cal.getTime());
+		final Calendar cal = Calendar.getInstance();
+		return passToken.getExpiryDate().before(cal.getTime());
 	}
 
 	@Override
@@ -165,5 +174,22 @@ public class UserServiceImpl implements UserService {
 		// TODO Auto-generated method stub
 		user.setPassword(new BCryptPasswordEncoder().encode(password));
 		userRepository.save(user);
+	}
+
+	@Override
+	public String logout(HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		SecurityContextHolder.clearContext();
+		if (request.getCookies() != null) {
+			System.out.println("I found some cookies");
+			for (Cookie cookie : request.getCookies()) {
+				cookie.setMaxAge(0);
+				cookie.setValue("");
+				cookie.setHttpOnly(true);
+				cookie.setPath("/");
+				response.addCookie(cookie);
+			}
+		}
+		return "Logout Successful";
 	}
 }

@@ -15,8 +15,38 @@ import { BoardModeratorComponent } from './board-moderator/board-moderator.compo
 import { BoardUserComponent } from './board-user/board-user.component';
 import { TotpComponent } from './totp/totp.component';
 import { OrderComponent } from './order/order.component';
+import {NgcCookieConsentModule, NgcCookieConsentConfig} from 'ngx-cookieconsent';
 
 import { authInterceptorProviders } from './_helpers/auth.interceptor';
+
+const cookieConfig:NgcCookieConsentConfig = {
+  "cookie": {
+    "domain": "localhost" // or 'your.domain.com'
+  },
+  "position": "bottom-right",
+  "theme": "classic",
+  "palette": {
+    "popup": {
+      "background": "#673AB7",
+      "text": "#ffffff",
+      "link": "#ffffff"
+    },
+    "button": {
+      "background": "#d9c421",
+      "text": "#000000",
+      "border": "transparent"
+    }
+  },
+  "type": "info",
+  "content": {
+    "message": "This website uses cookies to ensure you get the best experience on our website.",
+    "dismiss": "Got it!",
+    "deny": "Refuse cookies",
+    "link": "Learn more",
+    "href": "https://cookiesandyou.com",
+    "policy": "Cookie Policy"
+  }
+};
 
 @NgModule({
   declarations: [
@@ -35,7 +65,8 @@ import { authInterceptorProviders } from './_helpers/auth.interceptor';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    NgcCookieConsentModule.forRoot(cookieConfig)
   ],
   providers: [authInterceptorProviders],
   bootstrap: [AppComponent]
